@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bookmark App</title>
+  <STYLE>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #2b1d4f url('https://i.imgur.com/yQRgDTS.png') repeat;
+      color: #fff;
+      text-align: center;
+    }
+
+    .main-title {
+      background-color: #1e1e2f;
+      padding: 20px;
+      cursor: pointer;
+    }
+
+    .bookmarks-container {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      padding: 20px;
+      gap: 15px;
+    }
+
+    .bookmark {
+      background-color: #1a1a2e;
+      padding: 10px 15px;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 250px;
+      justify-content: space-between;
+    }
+
+    .bookmark span {
+      flex-grow: 1;
+      text-align: left;
+    }
+
+    .bookmark .delete {
+      color: white;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.6);
+    }
+
+    .modal-content {
+      background-color: #f4f4f4;
+      margin: 100px auto;
+      padding: 20px;
+      border-radius: 5px;
+      width: 300px;
+      color: black;
+      position: relative;
+    }
+
+    .close {
+      position: absolute;
+      top: 8px;
+      right: 12px;
+      font-size: 20px;
+      cursor: pointer;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      margin: 10px 0;
+      border: 1px solid #aaa;
+      border-radius: 3px;
+    }
+
+    .save-btn {
+      background-color: #6a5acd;
+      color: white;
+      border: none;
+      padding: 10px;
+      width: 100%;
+      cursor: pointer;
+      border-radius: 3px;
+    }
+  </STYLE>
+</head>
+<body>
+  <div class="container">
+    <h1 class="main-title" id="open-modal">ADD BOOKMARK</h1>
+    <div id="bookmarks" class="bookmarks-container"></div>
+
+    <!-- Modal -->
+    <div id="modal" class="modal">
+      <div class="modal-content">
+        <span id="close-modal" class="close">&times;</span>
+        <h2>Add Bookmark</h2>
+        <form id="bookmark-form">
+          <label for="website-name">Website Name</label>
+          <input type="text" id="website-name" required />
+          <label for="website-url">Website URL</label>
+          <input type="url" id="website-url" required />
+          <button type="submit" class="save-btn">Save</button>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const modal = document.getElementById('modal');
+    const openModal = document.getElementById('open-modal');
+    const closeModal = document.getElementById('close-modal');
+    const form = document.getElementById('bookmark-form');
+    const nameInput = document.getElementById('website-name');
+    const urlInput = document.getElementById('website-url');
+    const bookmarksContainer = document.getElementById('bookmarks');
+
+    let bookmarks = JSON.parse(localStorage.getItem('bookmarks')) || [];
+
+    // Display Bookmarks
+    function renderBookmarks() {
+      bookmarksContainer.innerHTML = '';
+      bookmarks.forEach((bookmark, index) => {
+        const div = document.createElement('div');
+        div.className = 'bookmark';
+        div.innerHTML = `
+          <span>
+            <img src="https://www.google.com/s2/favicons?domain=${bookmark.url}" alt="" width="16" />
+            ${bookmark.name}
+          </span>
+          <span class="delete" onclick="deleteBookmark(${index})">&times;</span>
+        `;
+        bookmarksContainer.appendChild(div);
+      });
+    }
+
+    // Add Bookmark
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const name = nameInput.value;
+      let url = urlInput.value;
+
+      if (!url.startsWith('http')) {
+        url = 'https://' + url;
+      }
+
+      bookmarks.push({ name, url });
+      localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+      renderBookmarks();
+      form.reset();
+      modal.style.display = 'none';
+    });
+
+    // Delete Bookmark
+    function deleteBookmark(index) {
+      bookmarks.splice(index, 1);
+      localStorage.setItem('bookmarks', JSON.stringify(bookmarks));
+      renderBookmarks();
+    }
+
+    // Modal Events
+    openModal.onclick = () => modal.style.display = 'block';
+    closeModal.onclick = () => modal.style.display = 'none';
+    window.onclick = (e) => {
+      if (e.target == modal) modal.style.display = 'none';
+    };
+
+    // Initial Load
+    renderBookmarks();
+  </script>
+</body>
+</html>
